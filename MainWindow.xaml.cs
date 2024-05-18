@@ -1,8 +1,10 @@
 ﻿using NAudio.Wave;
 using System;
+using System.Linq.Expressions;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Threading;
 
 namespace VoiceClient
@@ -14,8 +16,8 @@ namespace VoiceClient
         private List<WaveFileWriter> waveFiles = new List<WaveFileWriter>();
         private string outputFileName;
 
-        private DispatcherTimer timer = new DispatcherTimer(); // Таймер для отсчета времени записи
-        private TimeSpan recordingTime; // Время записи
+        private DispatcherTimer timer = new DispatcherTimer();
+        private TimeSpan recordingTime;
 
         public MainWindow()
         {
@@ -24,7 +26,7 @@ namespace VoiceClient
             timer.Tick += Timer_Tick;
         }
 
-        private void btnStart_Click(object sender, RoutedEventArgs e)
+        private async void btnStart_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -43,6 +45,7 @@ namespace VoiceClient
                     timerTextBlock.Text = recordingTime.ToString(@"hh\:mm\:ss");
                     timer.Start();
                     waveSource.StartRecording();
+                    await UpdateListView();
                 }
                 else
                 {
@@ -57,6 +60,69 @@ namespace VoiceClient
             {
                 MessageBox.Show(ex.Message);
             }
+        }
+
+        private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                if (listView.SelectedItem != null)
+                {
+                    dynamic selectedFile = listView.SelectedItem; // Получение выбранного элемента из ListView
+                    string selectedFileName = selectedFile.FileName; // Получение имени выбранного файла
+                    string filePathToPlay = waveFiles.Find(wf => wf.Filename == selectedFileName)?.Filename; // Поиск соответствующего пути к файлу
+                    if (filePathToPlay != null)
+                        outputFileName = filePathToPlay;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+
+            //if (filePathToPlay != null)
+            //{
+            //    PlayAudio(filePathToPlay); // Метод для воспроизведения аудио из выбранного файла
+            //}
+
+        }
+
+        //private void PlayAudio(string filePath)
+        //{
+        //    try
+        //    {
+        //        WaveFileReader fileReader = new WaveFileReader(filePath);
+        //        WaveOutEvent waveOut = new WaveOutEvent();
+        //        waveOut.Init(fileReader);
+        //        waveOut.Play();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show("Ошибка при воспроизведении аудио: " + ex.Message);
+        //    }
+        //}
+
+        private async Task UpdateListView()
+        {
+            listView.Items.Clear();
+
+            foreach (WaveFileWriter file in waveFiles)
+            {
+                listView.Items.Add(new
+                {
+                    FileName = file.Filename,
+                    Duration = GetFileDuration(file.Filename) // Метод для получения длительности файла
+                });
+            }
+        }
+
+        private string GetFileDuration(string fileName)
+        {
+            // Здесь можно добавить логику для определения длительности записанного файла
+            // Например, использовать NAudio или другие библиотеки для работы с аудио
+            // Возвратим пока что просто "N/A"
+            return "N/A";
         }
 
         private void waveSource_DataAvailable(object sender, WaveInEventArgs e)
@@ -139,7 +205,7 @@ namespace VoiceClient
                 waveOut.Init(fileReader);
                 do
                 {
-                   waveOut.Play();
+                    waveOut.Play();
                 }
                 while (waveOut.PlaybackState == PlaybackState.Playing);
 

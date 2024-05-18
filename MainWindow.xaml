@@ -11,5 +11,13 @@
         <Button Click="btnStop_Click" Margin="5" HorizontalAlignment="Center" VerticalAlignment="Center">Stop Recording</Button>
         <Button Click="btnPlay_Click"  Margin="5" HorizontalAlignment="Center" VerticalAlignment="Center">Play Received Audio</Button>
         <TextBlock Name="timerTextBlock" Text="00:00:00"/>
+        <ListView x:Name="listView" SelectionChanged="ListView_SelectionChanged">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="File Name" DisplayMemberBinding="{Binding FileName}" Width="200"/>
+                    <GridViewColumn Header="Duration" DisplayMemberBinding="{Binding Duration}" Width="100"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
     </StackPanel>
 </Window>
