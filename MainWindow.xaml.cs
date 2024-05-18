@@ -11,6 +11,7 @@ namespace VoiceClient
     {
         private WaveInEvent waveSource = null;
         private WaveFileWriter waveFile = null;
+        private List<WaveFileWriter> waveFiles = new List<WaveFileWriter>();
         private string outputFileName;
 
         private DispatcherTimer timer = new DispatcherTimer(); // Таймер для отсчета времени записи
@@ -36,6 +37,7 @@ namespace VoiceClient
                     waveSource.RecordingStopped += new EventHandler<StoppedEventArgs>(waveSource_RecordingStopped);
 
                     waveFile = new WaveFileWriter(outputFileName, waveSource.WaveFormat);
+                    waveFiles.Add(waveFile);
 
                     recordingTime = TimeSpan.Zero;
                     timerTextBlock.Text = recordingTime.ToString(@"hh\:mm\:ss");
