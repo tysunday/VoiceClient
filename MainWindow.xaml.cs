@@ -13,6 +13,7 @@ namespace VoiceClient
         private WaveFileWriter waveFile = null;
         private List<WaveFileWriter> waveFiles = new List<WaveFileWriter>();
         private string outputFileName;
+        private string hello;
 
         private DispatcherTimer timer = new DispatcherTimer(); // Таймер для отсчета времени записи
         private TimeSpan recordingTime; // Время записи
