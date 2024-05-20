@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms.Design;
+using System.IO;
 
 namespace VoiceClient
 {
@@ -16,11 +17,17 @@ namespace VoiceClient
         private string outputFileName = null;
         List<WaveFileWriter> waveFiles;
 
+        public string OutputFileName
+        {
+            get { return outputFileName; }
+            set { outputFileName = value; }
+        }
         public List<WaveFileWriter> WaveFiles
         {
             get { return waveFiles; }
             set { waveFiles = value; }
         }
+
         public AudioClass()
         {
             WaveFiles = new List<WaveFileWriter>();
@@ -33,6 +40,9 @@ namespace VoiceClient
                 if (waveFile != null)
                 {
                     waveFile.Dispose(); // здесь освобождаем ресурсы чтобы им можно было воспользоваться далее или что-то типа такого
+
+
+
 
                     using (WaveFileReader reader = new WaveFileReader(waveFile.Filename))
                     {
@@ -60,14 +70,15 @@ namespace VoiceClient
             {
                 if (waveSource == null)
                 {
-                    outputFileName = "audio#" + Guid.NewGuid().ToString();
+                    OutputFileName = "audio#" + Guid.NewGuid().ToString();
 
                     waveSource = new WaveInEvent();
                     waveSource.WaveFormat = new WaveFormat(44100, 1);
                     waveSource.DataAvailable += new EventHandler<WaveInEventArgs>(waveSource_DataAvailable);
                     waveSource.RecordingStopped += new EventHandler<StoppedEventArgs>(waveSource_RecordingStopped);
 
-                    waveFile = new WaveFileWriter(outputFileName, waveSource.WaveFormat);
+                    waveFile = new WaveFileWriter(OutputFileName, waveSource.WaveFormat);
+
 
                     if (WaveFiles != null)
                         WaveFiles.Add(waveFile);
@@ -112,7 +123,7 @@ namespace VoiceClient
         {
             try
             {
-                WaveFileReader fileReader = new WaveFileReader(outputFileName);
+                WaveFileReader fileReader = new WaveFileReader(OutputFileName);
                 WaveOutEvent waveOut = new WaveOutEvent();
                 waveOut.Init(fileReader);
                 do
@@ -175,6 +186,26 @@ namespace VoiceClient
             catch (Exception ex)
             {
                 MessageBox.Show($"Ошибка в Exception: {ex.Message}");
+            }
+        }
+        public byte[] GetRecordedAudioBytes(string outputFileName = null)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(outputFileName) && File.Exists(outputFileName))
+                {
+                    return File.ReadAllBytes(outputFileName);
+                }
+                else
+                {
+                    MessageBox.Show("Файл записи не найден.");
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при чтении файла: {ex.Message}");
+                return null;
             }
         }
     }

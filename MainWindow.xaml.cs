@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using System.IO;
 
 namespace VoiceClient
 {
     public partial class MainWindow : Window
     {
         AudioClass AC = new AudioClass();
-        private string outputFileName;
 
         private DispatcherTimer timer = new DispatcherTimer();
         private TimeSpan recordingTime;
@@ -38,8 +38,18 @@ namespace VoiceClient
             timer.Tick -= Timer_Tick;
             AC.StopRecord();
             UpdateListView();
+
+            if (File.Exists(AC.OutputFileName))
+            {
+                byte[] audioBytes = AC.GetRecordedAudioBytes(AC.OutputFileName);
+                MessageBox.Show($"Запись остановлена. Размер массива байтов: {audioBytes?.Length ?? 0}");
+            }
+            else
+            {
+                MessageBox.Show($"Файл {AC.OutputFileName} не найден.");
+            }
         }
-        private void btnPlay_Click(object sender, RoutedEventArgs e)
+            private void btnPlay_Click(object sender, RoutedEventArgs e)
         {
             AC.PlayAudio();
         }
@@ -53,7 +63,7 @@ namespace VoiceClient
                     string selectedFileName = selectedFile.FileName; // Получение имени выбранного файла
                     string filePathToPlay = AC.WaveFiles.Find(wf => wf.Filename == selectedFileName)?.Filename; // Поиск соответствующего пути к файлу
                     if (filePathToPlay != null)
-                        outputFileName = filePathToPlay;
+                        AC.OutputFileName = filePathToPlay;
                 }
             }
             catch (Exception ex)
