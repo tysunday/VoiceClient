@@ -79,29 +79,7 @@ namespace VoiceClient
             {
                 MessageBox.Show(ex.Message);
             }
-
-
-            //if (filePathToPlay != null)
-            //{
-            //    PlayAudio(filePathToPlay); // Метод для воспроизведения аудио из выбранного файла
-            //}
-
         }
-
-        //private void PlayAudio(string filePath)
-        //{
-        //    try
-        //    {
-        //        WaveFileReader fileReader = new WaveFileReader(filePath);
-        //        WaveOutEvent waveOut = new WaveOutEvent();
-        //        waveOut.Init(fileReader);
-        //        waveOut.Play();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        MessageBox.Show("Ошибка при воспроизведении аудио: " + ex.Message);
-        //    }
-        //}
 
         private async Task UpdateListView()
         {
