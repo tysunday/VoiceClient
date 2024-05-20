@@ -22,46 +22,27 @@ namespace VoiceClient
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        private void btnStart_Click(object sender, RoutedEventArgs e)
+        {
             timer.Interval = TimeSpan.FromSeconds(1); // Срабатывание каждую секунду
             timer.Tick += Timer_Tick;
+            recordingTime = TimeSpan.Zero;
+            timerTextBlock.Text = recordingTime.ToString(@"hh\:mm\:ss");
+            StartRecordAudio();
+            timer.Start();
         }
 
-        private async void btnStart_Click(object sender, RoutedEventArgs e)
+        private void btnStop_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                if (waveSource == null)
-                {
-                    outputFileName = "audio#" + Guid.NewGuid().ToString();
-                    waveSource = new WaveInEvent();
-                    waveSource.WaveFormat = new WaveFormat(44100, 1);
-                    waveSource.DataAvailable += new EventHandler<WaveInEventArgs>(waveSource_DataAvailable);
-                    waveSource.RecordingStopped += new EventHandler<StoppedEventArgs>(waveSource_RecordingStopped);
-
-                    waveFile = new WaveFileWriter(outputFileName, waveSource.WaveFormat);
-                    waveFiles.Add(waveFile);
-
-                    recordingTime = TimeSpan.Zero;
-                    timerTextBlock.Text = recordingTime.ToString(@"hh\:mm\:ss");
-                    timer.Start();
-                    waveSource.StartRecording();
-                    await UpdateListView();
-                }
-                else
-                {
-                    MessageBox.Show("Запись уже в процессе.");
-                }
-            }
-            catch (NAudio.MmException naudioex)
-            {
-                MessageBox.Show(naudioex.Message);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
+            timer.Tick -= Timer_Tick;
+            StopRecord();
         }
-
+        private void btnPlay_Click(object sender, RoutedEventArgs e)
+        {
+            PlayAudio();
+        }
         private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             try
@@ -122,32 +103,6 @@ namespace VoiceClient
                 MessageBox.Show(ex.Message);
             }
         }
-
-        private void btnStop_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (waveSource != null)
-                {
-                    timer.Stop();
-                    waveSource.StopRecording();
-                }
-            }
-            catch (NAudio.MmException naudioex)
-            {
-                MessageBox.Show(naudioex.Message);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-        }
-        private void Timer_Tick(object sender, EventArgs e)
-        {
-            recordingTime = recordingTime.Add(TimeSpan.FromSeconds(1));
-            timerTextBlock.Text = recordingTime.ToString(@"hh\:mm\:ss");
-        }
-
         private void waveSource_RecordingStopped(object sender, StoppedEventArgs e)
         {
             try
@@ -174,7 +129,62 @@ namespace VoiceClient
             }
         }
 
-        private void btnPlay_Click(object sender, RoutedEventArgs e)
+        private void StartRecordAudio()
+        {
+            try
+            {
+                if (waveSource == null)
+                {
+                    outputFileName = "audio#" + Guid.NewGuid().ToString();
+
+                    waveSource = new WaveInEvent();
+                    waveSource.WaveFormat = new WaveFormat(44100, 1);
+                    waveSource.DataAvailable += new EventHandler<WaveInEventArgs>(waveSource_DataAvailable);
+                    waveSource.RecordingStopped += new EventHandler<StoppedEventArgs>(waveSource_RecordingStopped);
+
+                    waveFile = new WaveFileWriter(outputFileName, waveSource.WaveFormat);
+                    waveFiles.Add(waveFile);
+
+                    waveSource.StartRecording();
+
+                    UpdateListView();
+                }
+                else
+                {
+                    MessageBox.Show("Запись уже в процессе.");
+                }
+            }
+            catch (NAudio.MmException naudioex)
+            {
+                MessageBox.Show(naudioex.Message);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void StopRecord()
+        {
+            try
+            {
+                if (waveSource != null)
+                {
+                    timer.Stop();
+                    waveSource.StopRecording();
+                }
+            }
+            catch (NAudio.MmException naudioex)
+            {
+                MessageBox.Show(naudioex.Message);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void PlayAudio()
         {
             try
             {
@@ -187,7 +197,6 @@ namespace VoiceClient
                 }
                 while (waveOut.PlaybackState == PlaybackState.Playing);
 
-                MessageBox.Show("Воспроизведение завершено.");
                 waveOut.Dispose();
                 waveOut = null;
             }
@@ -199,6 +208,12 @@ namespace VoiceClient
             {
                 MessageBox.Show(ex.Message);
             }
+        }
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            recordingTime = recordingTime.Add(TimeSpan.FromSeconds(1));
+            timerTextBlock.Text = recordingTime.ToString(@"hh\:mm\:ss");
         }
     }
 }
