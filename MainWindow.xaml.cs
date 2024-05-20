@@ -12,7 +12,6 @@ namespace VoiceClient
     public partial class MainWindow : Window
     {
         AudioClass AC = new AudioClass();
-        private List<WaveFileWriter> WaveFiles = new List<WaveFileWriter>();
         private string outputFileName;
 
         private DispatcherTimer timer = new DispatcherTimer();
@@ -31,7 +30,7 @@ namespace VoiceClient
             timerTextBlock.Text = recordingTime.ToString(@"hh\:mm\:ss");
             timer.Start();
 
-            AC.StartRecordAudio(outputFileName, WaveFiles);
+            AC.StartRecordAudio();
         }
 
         private void btnStop_Click(object sender, RoutedEventArgs e)
@@ -42,7 +41,7 @@ namespace VoiceClient
         }
         private void btnPlay_Click(object sender, RoutedEventArgs e)
         {
-            AC.PlayAudio(outputFileName);
+            AC.PlayAudio();
         }
         private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -52,7 +51,7 @@ namespace VoiceClient
                 {
                     dynamic selectedFile = listView.SelectedItem; // Получение выбранного элемента из ListView
                     string selectedFileName = selectedFile.FileName; // Получение имени выбранного файла
-                    string filePathToPlay = WaveFiles.Find(wf => wf.Filename == selectedFileName)?.Filename; // Поиск соответствующего пути к файлу
+                    string filePathToPlay = AC.WaveFiles.Find(wf => wf.Filename == selectedFileName)?.Filename; // Поиск соответствующего пути к файлу
                     if (filePathToPlay != null)
                         outputFileName = filePathToPlay;
                 }
@@ -69,7 +68,7 @@ namespace VoiceClient
             {
                 listView.Items.Clear();
 
-                foreach (WaveFileWriter file in WaveFiles)
+                foreach (WaveFileWriter file in AC.WaveFiles)
                 {
                     listView.Items.Add(new
                     {

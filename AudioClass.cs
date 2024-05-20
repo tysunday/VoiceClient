@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Forms.Design;
 
 namespace VoiceClient
 {
@@ -12,6 +13,19 @@ namespace VoiceClient
     {
         private WaveInEvent waveSource = null;
         private WaveFileWriter waveFile = null;
+        private string outputFileName = null;
+        List<WaveFileWriter> waveFiles;
+
+        public List<WaveFileWriter> WaveFiles
+        {
+            get { return waveFiles; }
+            set { waveFiles = value; }
+        }
+        public AudioClass()
+        {
+            WaveFiles = new List<WaveFileWriter>();
+        }
+
         public string GetFileDuration(WaveFileWriter waveFile)
         {
             try
@@ -40,7 +54,7 @@ namespace VoiceClient
             }
         }
 
-        public void StartRecordAudio(string outputFileName, List<WaveFileWriter> WaveFiles = null)
+        public void StartRecordAudio(List<WaveFileWriter> WaveFile = null)
         {
             try
             {
@@ -94,7 +108,7 @@ namespace VoiceClient
             }
         }
 
-        public void PlayAudio(string outputFileName)
+        public void PlayAudio()
         {
             try
             {
